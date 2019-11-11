@@ -2,11 +2,11 @@
 Build a Machine Learning model that can predict whether a car is sold below 90% of its average value.
 
 # Files/Folders
-* data: Contains the dataset to be used for training and testing.
-* DataAnalysis_UsedCarsDataset.ipynb: Python notebook in which data analysis is done.
-* usedCarsPricePrediction.py: Defines the predictive model.
-* Dockerfile: Used for building and executing the docker image.
-* requirements.txt: Defines the packages to be installed.
+* **data**: Contains the dataset to be used for training and testing.
+* **DataAnalysis_UsedCarsDataset.ipynb**: Python notebook in which data analysis is done.
+* **usedCarsPricePrediction.py**: Defines the predictive model.
+* **Dockerfile**: Used for building and executing the docker image.
+* **requirements.txt**: Defines the packages to be installed.
 
 # Dataset
 * Kaggle Dataset : [Used Cars Prediction](https://www.kaggle.com/orgesleka/used-cars-database)
