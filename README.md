@@ -6,4 +6,4 @@ Build a Machine Learning model that can predict whether a car is sold below 90% 
 
 # Execution Steps
 * docker image build -t usedcarsdocker .
-* docker run -v <fullPathToDataset>:/data/ usedcarsdocker
+* docker run -v \<fullPathToDataset\>:/data/ usedcarsdocker
