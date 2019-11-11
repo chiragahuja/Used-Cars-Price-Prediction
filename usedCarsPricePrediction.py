@@ -30,7 +30,7 @@ def getUniqueFeatureValues(dataFile):
     return uniqueColumnValues
 
 def getFeatureEncoder(uniqueColumnValues):
-    """Creates and returns LabelEncoder of each column/feature"""
+    """Creates and returns LabelEncoder(which maps strings to integer) of each column/feature"""
     columnEncoder = {}
     for key in uniqueColumnValues:
         columnEncoder[key] = LabelEncoder().fit(uniqueColumnValues[key])
@@ -54,7 +54,7 @@ def cleanDataset(dataset):
         
 
 def encodeDataset(dataset, columnEncoderDict):
-    """Used to labelEncoder to convert value of each column to categorical value"""
+    """Uses labelEncoder to convert value of each column in dataset to a categorical value"""
     for key in columnEncoderDict:
         pass
         encodedValue = columnEncoderDict[key].transform(dataset[key])
@@ -64,16 +64,19 @@ def encodeDataset(dataset, columnEncoderDict):
             
 def getFeatureEncoderForData(dataFile):
     """Iterates over the dataset to get unique values of each features 
-    and creates a LabelEncoder using the unique value
+    and creates a LabelEncoder for each feature using the unique values.
     """
     uniqueFeatureValues = getUniqueFeatureValues(dataFile)
     featureEncoderDict = getFeatureEncoder(uniqueFeatureValues)
     return featureEncoderDict
 
 def preprocessDataset(batchDataset,featureEncoderDict):
-    """Cleans and encodes Data"""
+    """Cleans data, encodes Data and converts the label 
+    which ensures RMSLE loss function is used during training
+    """
     batchDataset = cleanDataset(batchDataset) 
     batchDataset = encodeDataset(batchDataset,featureEncoderDict)
+    
     Y = np.log1p(batchDataset['price'])  
     batchDataset = batchDataset.drop(columns=['price'])
     return batchDataset,Y
@@ -91,7 +94,7 @@ def getBatchedFeaturesAndLabel(dataFile,featureEncoderDict, forTraining=True,spl
             yield testX,testY
 
 def trainModel(dataFile,featureEncoderDict,model):
-    """Trains a random forest model in batches and return the model"""
+    """Trains a random forest model in batches and returns the model"""
     print("=> Training Process Started")
     for trainX,trainY in getBatchedFeaturesAndLabel(dataFile,featureEncoderDict):
         model.fit(trainX, trainY)  
@@ -101,7 +104,11 @@ def trainModel(dataFile,featureEncoderDict,model):
 
 
 def testModelAndSavePredictions(dataFile,resultsFile,featureEncoderDict,model,splitRatio=0.2):
-    """Predicts used car price using random forest model on test data and stores result in a csv file"""
+    """Predicts used car price using trained random forest model on test data and stores result 
+    in a csv file along with carSoldOnLesserValue column(which signifies whether a car is 
+    sold at <90% of its average value)
+    """
+    
     print("=> Model Testing Started")
     firstTime = True
     carsBelowsAverage = 0
@@ -122,9 +129,9 @@ def testModelAndSavePredictions(dataFile,resultsFile,featureEncoderDict,model,sp
         predY = np.expm1(predY)
         
         batchDatasetCopy["predictedPrice"] = predY
-        batchDatasetCopy["cheapLabel"] = (batchDatasetCopy["price"]/batchDatasetCopy["predictedPrice"])<.9
+        batchDatasetCopy["carSoldOnLesserValue"] = (batchDatasetCopy["price"]/batchDatasetCopy["predictedPrice"])<.9
         
-        carsBelowsAverage = carsBelowsAverage + sum(batchDatasetCopy["cheapLabel"])
+        carsBelowsAverage = carsBelowsAverage + sum(batchDatasetCopy["carSoldOnLesserValue"])
         totalCars = totalCars + batchDatasetCopy.shape[0]
         if firstTime:
             batchDatasetCopy.to_csv(resultsFile, index=False)
@@ -165,9 +172,3 @@ if __name__ == "__main__":
 
     resultsFile = "data/results.csv"
     testModelAndSavePredictions(dataFile,resultsFile,featureEncoderDict,rForest)
-
-
-
-
-
-
